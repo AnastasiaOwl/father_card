@@ -12,9 +12,13 @@ export default function Dashboard() {
   const starsControls = useAnimation();
   const maskSize = useMotionValue(0);
   const [maskSizeState, setMaskSizeState] = useState(maskSize.get());
-  const [maskActive, setMaskActive] = useState(false);
-  const [showStars, setShowStars] = useState(false);
-  const [girlVisible, setGirlVisible] = useState(false);
+  const [maskActive, setMaskActive] = useState<boolean>(false);
+  const [showStars, setShowStars] = useState<boolean>(false);
+  const [girlVisible, setGirlVisible] = useState<boolean>(false);
+  const [showAnimation,   setShowAnimation  ] = useState<boolean>(false);
+  const [animationDone, setAnimationDone] = useState<boolean>(false);
+const [startSwap, setStartSwap] = useState<boolean>(false);
+
 
 
   const PULSE_COUNT = 4;
@@ -43,6 +47,13 @@ useEffect(() => {
   const unsubscribe = maskSize.on("change", (v) => setMaskSizeState(v));
   return unsubscribe;
 }, [maskSize]);
+
+useEffect(() => {
+  if (!showAnimation) return;
+  const timer = setTimeout(() => setAnimationDone(true), 2000);
+  return () => clearTimeout(timer);
+}, [showAnimation]);
+
 
 
 useEffect(() => {
@@ -90,6 +101,8 @@ useEffect(() => {
     filter: `drop-shadow(0px 0px 8px white)`,
     transition: { duration: 0.6 },
   });
+      setShowAnimation(true);
+      setTimeout(() => setGirlVisible(false), 100);
 };
   const timer = setTimeout(pulse, (1 + stars.length * 0.3 + 0.8) * 1000);
   return () => clearTimeout(timer);
@@ -118,7 +131,7 @@ useEffect(() => {
       <motion.img
         src="/images/girl.png"
         alt="girl"
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 1 }}
         animate={{ opacity: girlVisible ? 1 : 0 }}
         className="fixed top-[65%] left-[52%] lg:w-[550px] lg:h-[550px] md:w-[180px] md:h-[180px] -translate-x-1/2 -translate-y-1/2"
         style={{
@@ -130,6 +143,31 @@ useEffect(() => {
           transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
         }}
       />
+      {showAnimation && !animationDone && (
+      <motion.div 
+        className="fixed lg:top-[29%] left-[34%] pointer-events-none "
+        initial={{ opacity: 1 }}
+      >
+        <iframe
+          src="/dragonbones/fathercard.html"
+          className="lg:w-[550px] lg:h-[550px]"
+          style={{
+            border: "none",
+            zIndex: 1,
+          }}
+        />
+      </motion.div>
+    )}
+    {animationDone && (
+      <img
+        src="/dragonbones/final.png"
+        alt="Final"
+        className="fixed lg:top-[27%] left-[34%] lg:w-[550px] lg:h-[550px]"
+        style={{
+          zIndex: 1,
+        }}
+      />
+    )}
       {stars.map((star, i) => (
         <motion.div
           key={i}
