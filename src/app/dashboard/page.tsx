@@ -60,7 +60,7 @@ const starAnimations = useRef(stars.map(() => useAnimation())).current;
 
 
 useEffect(() => {
-    const timer = setTimeout(() => setShowStars(true), 2000);
+    const timer = setTimeout(() => setShowStars(true), 1900);
     return () => clearTimeout(timer);
   }, []);
 
@@ -183,8 +183,20 @@ useEffect(() => {
 
     return(
     <div className="h-[100dvh]  bg-black relative overflow-hidden">
-      {showNightSky&&(
-        <NightSkyDots/>
+   {showNightSky && (
+        <div
+          className="fixed inset-0 w-full h-full z-0 pointer-events-none"
+          style={{
+            WebkitMaskImage: mask,
+            maskImage: mask,
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
+            background: "black",
+          }}
+        >
+          <NightSkyDots />
+        </div>
       )}
       <motion.img
         src="/images/girl.png"

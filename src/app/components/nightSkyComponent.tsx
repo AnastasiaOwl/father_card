@@ -5,6 +5,7 @@ type NightSkyDotsProps = {
   minSize?: number;
   maxSize?: number;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 const NightSkyDots: React.FC<NightSkyDotsProps> = ({
