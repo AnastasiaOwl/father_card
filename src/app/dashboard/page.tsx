@@ -1,6 +1,7 @@
 "use client";
-import { motion, useAnimation, useMotionValue, useSpring, animate } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useAnimation, useMotionValue, animate } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import NightSkyDots from "../components/nightSkyComponent";
 
 type StarSVGProps = React.SVGProps<SVGSVGElement> & {
   size?: number;
@@ -11,13 +12,14 @@ export default function Dashboard() {
 
   const starsControls = useAnimation();
   const maskSize = useMotionValue(0);
+  const finalImgAnimation = useAnimation();
   const [maskSizeState, setMaskSizeState] = useState(maskSize.get());
   const [maskActive, setMaskActive] = useState<boolean>(false);
   const [showStars, setShowStars] = useState<boolean>(false);
   const [girlVisible, setGirlVisible] = useState<boolean>(false);
   const [showAnimation,   setShowAnimation  ] = useState<boolean>(false);
   const [animationDone, setAnimationDone] = useState<boolean>(false);
-const [startSwap, setStartSwap] = useState<boolean>(false);
+  const [showNightSky, setShowNightSky] = useState<boolean>(false);
 
 
 
@@ -37,6 +39,25 @@ const [startSwap, setStartSwap] = useState<boolean>(false);
   { size: 34, className: "fixed top-[89%] left-[52%]" },
   { size: 55, className: "fixed top-[86%] left-[48%]" },
 ];
+
+const starBurstTargets = [
+  { x: 450, y: -450 },
+  { x: -650, y: -180 },
+  { x: -300, y: -250 },
+  { x: -700, y: -600 },
+  { x: 550, y: -180 },
+  { x: -170, y: -50 },
+  { x: 200, y: -550 },
+  { x: -610, y: -480 },
+  { x: 220, y: -330 },
+  { x: -160, y: -260 },
+  { x: 500, y: -120 },
+  { x: -190, y: -470 },
+];
+
+
+const starAnimations = useRef(stars.map(() => useAnimation())).current;
+
 
 useEffect(() => {
     const timer = setTimeout(() => setShowStars(true), 2000);
@@ -64,6 +85,7 @@ useEffect(() => {
     if (i === 0) {
       setGirlVisible(true);
       setMaskActive(true);
+      setShowNightSky(true);
     }
     await Promise.all([
       animate(maskSize, sizes[i + 1], { duration: 0.5, ease: "easeInOut" }).finished,
@@ -102,11 +124,44 @@ useEffect(() => {
     transition: { duration: 0.6 },
   });
       setShowAnimation(true);
-      setTimeout(() => setGirlVisible(false), 100);
+      setTimeout(() => setGirlVisible(false), 1000);
 };
   const timer = setTimeout(pulse, (1 + stars.length * 0.3 + 0.8) * 1000);
   return () => clearTimeout(timer);
 }, [showStars, stars.length]);
+
+useEffect(() => {
+  if (showAnimation) {
+    const animateStars = async () => {
+      await Promise.all(
+        stars.map((star, i) =>
+          starAnimations[i].start({
+            y: -100,
+            scale: 1,
+            transition: { duration: 2, ease: "easeInOut", delay: 0.8 },
+          })
+        )
+      );
+      await Promise.all([
+        ...stars.map((star, i) =>
+          starAnimations[i].start({
+            x: starBurstTargets[i].x,
+            y: starBurstTargets[i].y,
+            scale: 3,
+            transition: { duration: 1.6, ease: "easeInOut" },
+          })
+        ),
+        finalImgAnimation.start({
+          y: 700,
+          opacity: 0,
+          transition: { duration: 1.6, ease: "easeInOut" },
+        }),
+      ]);
+    };
+
+    animateStars();
+  }
+}, [showAnimation]);
 
 
 
@@ -128,6 +183,9 @@ useEffect(() => {
 
     return(
     <div className="h-[100dvh]  bg-black relative overflow-hidden">
+      {showNightSky&&(
+        <NightSkyDots/>
+      )}
       <motion.img
         src="/images/girl.png"
         alt="girl"
@@ -159,13 +217,13 @@ useEffect(() => {
       </motion.div>
     )}
     {animationDone && (
-      <img
+      <motion.img
         src="/dragonbones/final.png"
         alt="Final"
+        animate={finalImgAnimation}
+        initial={{ y: 0, opacity: 1 }}
         className="fixed lg:top-[27%] left-[34%] lg:w-[550px] lg:h-[550px]"
-        style={{
-          zIndex: 1,
-        }}
+        style={{ zIndex: 1 }}
       />
     )}
       {stars.map((star, i) => (
@@ -184,9 +242,11 @@ useEffect(() => {
           style={{ zIndex: 10, pointerEvents: "none", position: "fixed" }}
         >
           <motion.div animate={starsControls}>
+          <motion.div animate={starAnimations[i]}>
             <StarSVG size={star.size} />
           </motion.div>
         </motion.div>
+      </motion.div>
       ))}
     </div>
     )
