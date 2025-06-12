@@ -2,6 +2,7 @@
 import { motion, useAnimation, useMotionValue, animate } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import NightSkyDots from "../components/nightSkyComponent";
+import TextFromStars from "../components/textFromStars";
 
 type StarSVGProps = React.SVGProps<SVGSVGElement> & {
   size?: number;
@@ -20,7 +21,8 @@ export default function Dashboard() {
   const [showAnimation,   setShowAnimation  ] = useState<boolean>(false);
   const [animationDone, setAnimationDone] = useState<boolean>(false);
   const [showNightSky, setShowNightSky] = useState<boolean>(false);
-
+  const [starsOnString, setStarsOnString] = useState<boolean>(false);
+  const [showText, setShowText] =useState<boolean>(false);
 
 
   const PULSE_COUNT = 4;
@@ -157,13 +159,12 @@ useEffect(() => {
           transition: { duration: 1.6, ease: "easeInOut" },
         }),
       ]);
+      setStarsOnString(true);
+      setShowText(true);
     };
-
     animateStars();
   }
 }, [showAnimation]);
-
-
 
     const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
     <svg width={size} height={size} viewBox="0 0 100 100" {...props} style={style}>
@@ -260,6 +261,38 @@ useEffect(() => {
         </motion.div>
       </motion.div>
       ))}
+      {starsOnString &&
+        stars.map((star, i) => {
+          function getPercent(css: string, type: "left" | "top") {
+            const match = css.match(new RegExp(`${type}-\\[(\\d+)%\\]`));
+            return match ? Number(match[1]) : 50;
+          }
+          const leftPercent = getPercent(star.className, "left");
+          const topPercent = getPercent(star.className, "top");
+          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${star.size / 2}px)`;
+          const top = `calc(${topPercent}% + ${starBurstTargets[i].y}px)`;
+          const starTopOffset = -(star.size / 2);
+          return (
+            <div
+              key={i}
+              className="pointer-events-none"
+              style={{
+                position: "fixed",
+                left: left,
+                top: 0,
+                width: "1px",
+                height: `calc(${top} + ${starTopOffset}px)`,
+                background: "white",
+                opacity: 0.2,
+                zIndex: 9,
+              }}
+            />
+          );
+      }
+      )}
+      {showText && (
+        <TextFromStars/>
+      )}
     </div>
     )
 }
