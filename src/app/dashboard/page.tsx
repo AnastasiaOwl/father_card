@@ -152,7 +152,7 @@ useEffect(() => {
           starAnimations[i].start({
             x: starBurstTargets[i].x,
             y: starBurstTargets[i].y,
-            scale: 3,
+            scale: 2.5,
             transition: { duration: 1.6, ease: "easeInOut" },
           })
         ),
@@ -170,7 +170,7 @@ useEffect(() => {
 }, [showAnimation]);
 
 const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
-  <svg
+  <svg 
     width={size * (STAR_WIDTH / STAR_BOX_SIZE)}
     height={size * (STAR_HEIGHT / STAR_BOX_SIZE)}
     viewBox={viewBox}
@@ -300,9 +300,9 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
           }
           const leftPercent = getPercent(star.className, "left");
           const topPercent = getPercent(star.className, "top");
-          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${star.size / 2}px)`;
+          const starWidthPx = star.size * (STAR_WIDTH / STAR_BOX_SIZE);
+          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${starWidthPx / 2}px)`;
           const top = `calc(${topPercent}% + ${starBurstTargets[i].y}px)`;
-          const starTopOffset = 0;
           return (
             <div
               key={`string-${i}`}
