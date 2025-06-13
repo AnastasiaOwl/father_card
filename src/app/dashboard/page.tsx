@@ -10,6 +10,10 @@ type StarSVGProps = React.SVGProps<SVGSVGElement> & {
 };
 
 export default function Dashboard() {
+  const STAR_BOX_SIZE = 100;
+  const STAR_WIDTH = 76;
+  const STAR_HEIGHT = 67;
+  const viewBox = "12 0 76 67";
 
   const starsControls = useAnimation();
   const maskSize = useMotionValue(0);
@@ -28,7 +32,7 @@ export default function Dashboard() {
   const PULSE_COUNT = 4;
 
     const stars = [
-  { size: 40, className: "fixed top-[90%] left-[52%]" },
+  { size: 40, className: "fixed top-[90%] left-[52%] " },
   { size: 50, className: "fixed top-[90%] left-[50%]" },
   { size: 42, className: "fixed top-[90%] left-[48%]" },
   { size: 12, className: "fixed top-[90%] left-[50%]" },
@@ -51,12 +55,11 @@ const starBurstTargets = [
   { x: -170, y: -50 },
   { x: 200, y: -550 },
   { x: -610, y: -480 },
-  { x: 220, y: -330 },
+  { x: 220, y: -300 },
   { x: -160, y: -260 },
   { x: 500, y: -120 },
   { x: -190, y: -470 },
 ];
-
 
 const starAnimations = useRef(stars.map(() => useAnimation())).current;
 
@@ -166,14 +169,23 @@ useEffect(() => {
   }
 }, [showAnimation]);
 
-    const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
-    <svg width={size} height={size} viewBox="0 0 100 100" {...props} style={style}>
-        <polygon
-        points="50,15 61,39 88,39 66,56 75,82 50,66 25,82 34,56 12,39 39,39"
-        fill="white"
-        />
-    </svg>
-    );
+const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
+  <svg
+    width={size * (STAR_WIDTH / STAR_BOX_SIZE)}
+    height={size * (STAR_HEIGHT / STAR_BOX_SIZE)}
+    viewBox={viewBox}
+    {...props}
+    style={style}
+  >
+    <polygon
+      points="50,0 61,24 88,24 66,41 75,67 50,51 25,67 34,41 12,24 39,24"
+      fill="white"
+    />
+  </svg>
+);
+
+
+
 
  const mask =
   maskActive && girlVisible
@@ -239,28 +251,47 @@ useEffect(() => {
         style={{ zIndex: 1 }}
       />
     )}
-      {stars.map((star, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: showStars ? 1 : 0
-          }}
-          transition={{
-            delay: showStars ? 1.0 + i * 0.3 : 0,
-            duration: 0.8,
-            type: "tween"
-          }}
-          className={star.className}
-          style={{ zIndex: 10, pointerEvents: "none", position: "fixed" }}
-        >
-          <motion.div animate={starsControls}>
-          <motion.div animate={starAnimations[i]}>
+    {stars.map((star, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: showStars ? 1 : 0
+        }}
+        transition={{
+          delay: showStars ? 1.0 + i * 0.3 : 0,
+          duration: 0.8,
+          type: "tween"
+        }}
+        className={star.className}
+        style={{ zIndex: 10, position: "fixed" }}
+      >
+        <motion.div animate={starsControls}>
+          <motion.div
+            animate={starAnimations[i]}
+            onPointerDown={starsOnString ? () => {
+            starAnimations[i].start({
+              rotate: [-22, 28, -14, 6, 0],
+              transition: { duration: 1.3, ease: "easeInOut" },
+            });
+            } : undefined}
+            onTouchStart={starsOnString ? () => {
+             starAnimations[i].start({
+              rotate: [-22, 28, -14, 6, 0],
+              transition: { duration: 1.3, ease: "easeInOut" },
+            });
+           } : undefined}
+            style={{
+              transformOrigin: "50% 0%",
+              cursor: starsOnString ? "pointer" : "default",
+              pointerEvents: starsOnString ? "auto" : "none"
+            }}
+          >
             <StarSVG size={star.size} />
           </motion.div>
         </motion.div>
       </motion.div>
-      ))}
+    ))}
       {starsOnString &&
         stars.map((star, i) => {
           function getPercent(css: string, type: "left" | "top") {
@@ -271,25 +302,24 @@ useEffect(() => {
           const topPercent = getPercent(star.className, "top");
           const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${star.size / 2}px)`;
           const top = `calc(${topPercent}% + ${starBurstTargets[i].y}px)`;
-          const starTopOffset = -(star.size / 2);
+          const starTopOffset = 0;
           return (
             <div
-              key={i}
-              className="pointer-events-none"
+              key={`string-${i}`}
               style={{
                 position: "fixed",
-                left: left,
+                left,
                 top: 0,
                 width: "1px",
-                height: `calc(${top} + ${starTopOffset}px)`,
+                height: `calc(${top})`,
                 background: "white",
                 opacity: 0.2,
                 zIndex: 9,
               }}
             />
           );
+        })
       }
-      )}
       {showText && (
         <TextFromStars/>
       )}
