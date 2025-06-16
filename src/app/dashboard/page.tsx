@@ -1,4 +1,5 @@
 "use client";
+
 import { motion, useAnimation, useMotionValue, animate } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import NightSkyDots from "../components/nightSkyComponent";
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const starsControls = useAnimation();
   const maskSize = useMotionValue(0);
   const finalImgAnimation = useAnimation();
+  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+  const [removed,     setRemoved    ] = useState<boolean>(false);
   const [maskSizeState, setMaskSizeState] = useState(maskSize.get());
   const [maskActive, setMaskActive] = useState<boolean>(false);
   const [showStars, setShowStars] = useState<boolean>(false);
@@ -27,6 +30,21 @@ export default function Dashboard() {
   const [showNightSky, setShowNightSky] = useState<boolean>(false);
   const [starsOnString, setStarsOnString] = useState<boolean>(false);
   const [showText, setShowText] =useState<boolean>(false);
+  const shineRef = useRef<HTMLAudioElement | null>(null);
+  const finaleRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    shineRef.current = new Audio("/sounds/shine.mp3");
+    shineRef.current.preload = "auto";
+
+    finaleRef.current = new Audio("/sounds/See_You_Again.mp3");
+    finaleRef.current.preload = "auto";
+  }, []);
+
+  function handleFirstTap() {
+    setHasInteracted(true);
+    setTimeout(() => setRemoved(true), 14500);
+  }
 
 
   const PULSE_COUNT = 4;
@@ -61,142 +79,182 @@ const starBurstTargets = [
   { x: -190, y: -470 },
 ];
 
-const starAnimations = useRef(stars.map(() => useAnimation())).current;
+  const starAnimations = useRef(stars.map(() => useAnimation())).current;
 
-
-useEffect(() => {
-    const timer = setTimeout(() => setShowStars(true), 1900);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStars(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-  const unsubscribe = maskSize.on("change", (v) => setMaskSizeState(v));
-  return unsubscribe;
-}, [maskSize]);
+    const unsubscribe = maskSize.on("change", (v) => setMaskSizeState(v));
+    return unsubscribe;
+  }, [maskSize]);
 
-useEffect(() => {
-  if (!showAnimation) return;
-  const timer = setTimeout(() => setAnimationDone(true), 2000);
-  return () => clearTimeout(timer);
-}, [showAnimation]);
+  useEffect(() => {
+    if (!showAnimation) return;
+    const timer = setTimeout(() => setAnimationDone(true), 2000);
+    return () => clearTimeout(timer);
+  }, [showAnimation]);
 
+  useEffect(() => {
+    if (!showStars) return;
 
-
-useEffect(() => {
-  if (!showStars) return;
-  const sizes = [10, 30, 50, 80, 120];
-  const pulse = async () => {
-  for (let i = 0; i < PULSE_COUNT; i++) {
-    if (i === 0) {
-      setGirlVisible(true);
-      setMaskActive(true);
-      setShowNightSky(true);
-    }
-    await Promise.all([
-      animate(maskSize, sizes[i + 1], { duration: 0.5, ease: "easeInOut" }).finished,
-      starsControls.start({
-        filter: `drop-shadow(0px 0px ${16 * (i + 1)}px white) drop-shadow(0px 0px ${18 * (i + 1)}px white)`,
-        transition: { duration: 0.5 },
-      }),
-    ]);
-    await Promise.all([
-      animate(maskSize, sizes[i + 1] - 10, { duration: 0.18, ease: "easeInOut" }).finished,
-      starsControls.start({
-        filter: `drop-shadow(0px 0px 8px white) drop-shadow(0px 0px 10px white)`,
-        transition: { duration: 0.18 },
-      }),
-    ]);
-    await Promise.all([
-      animate(maskSize, sizes[i + 1], { duration: 0.15, ease: "easeInOut" }).finished,
-      starsControls.start({
-        filter: `drop-shadow(0px 0px ${16 * (i + 1)}px white) drop-shadow(0px 0px ${18 * (i + 1)}px white)`,
-        transition: { duration: 0.15 },
-      }),
-    ]);
-    await new Promise((r) => setTimeout(r, 200));
-    await starsControls.start({
-      filter: `drop-shadow(0px 0px 2px white)`,
-      transition: { duration: 0.2 },
+    stars.forEach((_, i) => {
+      setTimeout(() => {
+        const shine = shineRef.current;
+        if (shine) {
+          shine.currentTime = 0;
+          shine.play().catch(console.error);
+        }
+      }, 1000 + i * 300);
     });
-    await new Promise((r) => setTimeout(r, 150));
-  }
-  await starsControls.start({
-    filter: `drop-shadow(0px 0px 36px white) drop-shadow(0px 0px 48px white)`,
-    transition: { duration: 0.4 },
-  });
-  await starsControls.start({
-    filter: `drop-shadow(0px 0px 8px white)`,
-    transition: { duration: 0.6 },
-  });
-      setShowAnimation(true);
-      setTimeout(() => setGirlVisible(false), 1000);
-};
-  const timer = setTimeout(pulse, (1 + stars.length * 0.3 + 0.8) * 1000);
-  return () => clearTimeout(timer);
-}, [showStars, stars.length]);
+  }, [showStars]);
 
-useEffect(() => {
-  if (showAnimation) {
-    const animateStars = async () => {
-      await Promise.all(
-        stars.map((star, i) =>
-          starAnimations[i].start({
-            y: -100,
-            scale: 1,
-            transition: { duration: 2, ease: "easeInOut", delay: 0.8 },
-          })
-        )
-      );
+  useEffect(() => {
+    if (!showStars) return;
+    const totalStarDuration = 1.0 + (stars.length - 1) * 0.3 + 0.8;
+    const timer = setTimeout(() => {
+      const final = finaleRef.current;
+      if (final) {
+        final.currentTime = 0;
+        final.play().catch(console.error);
+      }
+    }, totalStarDuration * 1000);
+
+    return () => clearTimeout(timer);
+  }, [showStars]);
+
+
+  useEffect(() => {
+    if (!showStars) return;
+    const sizes = [10, 30, 50, 80, 120];
+    const pulse = async () => {
+    for (let i = 0; i < PULSE_COUNT; i++) {
+      if (i === 0) {
+        setGirlVisible(true);
+        setMaskActive(true);
+        setShowNightSky(true);
+      }
       await Promise.all([
-        ...stars.map((star, i) =>
-          starAnimations[i].start({
-            x: starBurstTargets[i].x,
-            y: starBurstTargets[i].y,
-            scale: 2.5,
-            transition: { duration: 1.6, ease: "easeInOut" },
-          })
-        ),
-        finalImgAnimation.start({
-          y: 700,
-          opacity: 0,
-          transition: { duration: 1.6, ease: "easeInOut" },
+        animate(maskSize, sizes[i + 1], { duration: 0.5, ease: "easeInOut" }).finished,
+        starsControls.start({
+          filter: `drop-shadow(0px 0px ${16 * (i + 1)}px white) drop-shadow(0px 0px ${18 * (i + 1)}px white)`,
+          transition: { duration: 0.5 },
         }),
       ]);
-      setStarsOnString(true);
-      setShowText(true);
-    };
-    animateStars();
-  }
-}, [showAnimation]);
+      await Promise.all([
+        animate(maskSize, sizes[i + 1] - 10, { duration: 0.18, ease: "easeInOut" }).finished,
+        starsControls.start({
+          filter: `drop-shadow(0px 0px 8px white) drop-shadow(0px 0px 10px white)`,
+          transition: { duration: 0.18 },
+        }),
+      ]);
+      await Promise.all([
+        animate(maskSize, sizes[i + 1], { duration: 0.15, ease: "easeInOut" }).finished,
+        starsControls.start({
+          filter: `drop-shadow(0px 0px ${16 * (i + 1)}px white) drop-shadow(0px 0px ${18 * (i + 1)}px white)`,
+          transition: { duration: 0.15 },
+        }),
+      ]);
+      await new Promise((r) => setTimeout(r, 200));
+      await starsControls.start({
+        filter: `drop-shadow(0px 0px 2px white)`,
+        transition: { duration: 0.2 },
+      });
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    await starsControls.start({
+      filter: `drop-shadow(0px 0px 36px white) drop-shadow(0px 0px 48px white)`,
+      transition: { duration: 0.4 },
+    });
+    await starsControls.start({
+      filter: `drop-shadow(0px 0px 8px white)`,
+      transition: { duration: 0.6 },
+    });
+        setShowAnimation(true);
+        setTimeout(() => setGirlVisible(false), 1000);
+  };
+    const timer = setTimeout(pulse, (1 + stars.length * 0.3 + 0.8) * 1000);
+    return () => clearTimeout(timer);
+  }, [showStars, stars.length]);
 
-const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
-  <svg 
-    width={size * (STAR_WIDTH / STAR_BOX_SIZE)}
-    height={size * (STAR_HEIGHT / STAR_BOX_SIZE)}
-    viewBox={viewBox}
-    {...props}
-    style={style}
-  >
-    <polygon
-      points="50,0 61,24 88,24 66,41 75,67 50,51 25,67 34,41 12,24 39,24"
-      fill="white"
-    />
-  </svg>
-);
+  useEffect(() => {
+    if (showAnimation) {
+      const animateStars = async () => {
+        await Promise.all(
+          stars.map((star, i) =>
+            starAnimations[i].start({
+              y: -100,
+              scale: 1,
+              transition: { duration: 2, ease: "easeInOut", delay: 0.8 },
+            })
+          )
+        );
+        await Promise.all([
+          ...stars.map((star, i) =>
+            starAnimations[i].start({
+              x: starBurstTargets[i].x,
+              y: starBurstTargets[i].y,
+              scale: 2.5,
+              transition: { duration: 1.6, ease: "easeInOut" },
+            })
+          ),
+          finalImgAnimation.start({
+            y: 700,
+            opacity: 0,
+            transition: { duration: 1.6, ease: "easeInOut" },
+          }),
+        ]);
+        setStarsOnString(true);
+        setShowText(true);
+      };
+      animateStars();
+    }
+  }, [showAnimation]);
 
+  const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
+    <svg 
+      width={size * (STAR_WIDTH / STAR_BOX_SIZE)}
+      height={size * (STAR_HEIGHT / STAR_BOX_SIZE)}
+      viewBox={viewBox}
+      {...props}
+      style={style}
+    >
+      <polygon
+        points="50,0 61,24 88,24 66,41 75,67 50,51 25,67 34,41 12,24 39,24"
+        fill="white"
+      />
+    </svg>
+  );
 
-
-
- const mask =
-  maskActive && girlVisible
-    ? `radial-gradient(circle at 50% 76%, white ${maskSizeState}%, transparent ${maskSizeState + 12}%)`
-    : undefined;
-
-
+  const mask =
+    maskActive && girlVisible
+      ? `radial-gradient(circle at 50% 76%, white ${maskSizeState}%, transparent ${maskSizeState + 12}%)`
+      : undefined;
 
     return(
     <div className="h-[100dvh]  bg-black relative overflow-hidden">
-   {showNightSky && (
+    {!hasInteracted && (
+          <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            onClick={() => {
+              shineRef.current?.play().then(() => {
+                shineRef.current?.pause();
+                shineRef.current!.currentTime = 0;
+              }).catch(console.error);
+
+              finaleRef.current?.play().then(() => {
+                finaleRef.current?.pause();
+                finaleRef.current!.currentTime = 0;
+              }).catch(console.error);
+              handleFirstTap();
+            }}
+          >
+            <p className="text-white text-2xl">тапни будь-де</p>
+          </div>
+    )}
+   {hasInteracted && showNightSky && (
         <div
           className="fixed inset-0 w-full h-full z-0 pointer-events-none"
           style={{
@@ -226,7 +284,7 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
           transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
         }}
       />
-      {showAnimation && !animationDone && (
+      {hasInteracted && showAnimation && !animationDone && (
       <motion.div 
         className="fixed lg:top-[29%] left-[34%] pointer-events-none "
         initial={{ opacity: 1 }}
@@ -320,7 +378,7 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => (
           );
         })
       }
-      {showText && (
+      {hasInteracted && showText && (
         <TextFromStars/>
       )}
     </div>
