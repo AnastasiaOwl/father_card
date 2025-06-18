@@ -110,7 +110,7 @@ const starBurstTargets = useMemo(() => {
   function getShowAnimationDelay() {
     if (typeof window === "undefined") return 0;
     const width = window.innerWidth;
-    return width < 768 ? 40000 : 0;
+    return width < 768 ? 100000 : 0;
   }
 
   const initialY = typeof window !== "undefined" && window.innerWidth < 768 ? -50 : -100;
@@ -354,7 +354,7 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
         alt="Final"
         animate={finalImgAnimation}
         initial={{ y: 0, opacity: 1 }}
-        className="fixed lg:top-[27%] lg:left-[34%] md:top-[10%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px]"
+        className="fixed lg:top-[27%] lg:left-[34%] md:top-[8%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[290px] md:h-[290px]"
         style={{ zIndex: 1 }}
       />
     )}
