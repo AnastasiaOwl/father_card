@@ -1,29 +1,38 @@
-import React, { useEffect, useRef } from "react";
-import points from "../particle-points.json"
+import React, { useEffect, useRef, useState } from "react";
+import pointsDesktop from "../particle-points.json";
+import pointsMobile from "../particle-points-mobile.json";
+
+type Point = { x: number; y: number };
 
 type Props = {
-  width?: number;
-  height?: number;
   color?: string;
   duration?: number;
 };
 
 export default function TextFromStars({
-  width = 1200,
-  height = 660,
   color = "white",
   duration = 1.6,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [points, setPoints] = useState<Point[] | null>(null);
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 660 });
 
   useEffect(() => {
-    console.log("points", points);
+    const isMobile = window.innerWidth < 1024;
+    setPoints(isMobile ? pointsMobile : pointsDesktop);
+    setDimensions(isMobile ? { width: 700, height: 380 } : { width: 1200, height: 660 });
+  }, []);
+
+  useEffect(() => {
+    if (!points) return;
+
+    const { width, height } = dimensions;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const particles = points.map((to: {x: number, y: number}) => ({
+    const particles = points.map((to) => ({
       from: {
         x: Math.random() * width,
         y: height + 80 + Math.random() * 100,
@@ -32,14 +41,12 @@ export default function TextFromStars({
       delay: Math.random() * 0.6,
     }));
 
-
     let running = true;
     let start: number | null = null;
 
     function animate(now: number) {
-      if (!running) return;
+      if (!running || !ctx) return;
       if (!start) start = now;
-      if (!ctx) return;
       const elapsed = (now - start) / 1000;
       ctx.clearRect(0, 0, width, height);
 
@@ -60,23 +67,24 @@ export default function TextFromStars({
         ctx.globalAlpha = 0.8;
         ctx.fill();
       }
+
       ctx.globalAlpha = 1;
       if (elapsed < duration + 0.6) {
         requestAnimationFrame(animate);
       }
     }
-    requestAnimationFrame(animate);
 
+    requestAnimationFrame(animate);
     return () => {
       running = false;
     };
-  }, [width, height, color, duration]);
+  }, [points, dimensions, color, duration]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={width}
-      height={height}
+      width={dimensions.width}
+      height={dimensions.height}
       style={{
         display: "block",
         margin: "0 auto",
