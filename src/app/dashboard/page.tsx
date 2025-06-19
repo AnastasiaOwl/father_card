@@ -2,7 +2,6 @@
 
 import { motion, useAnimation, useMotionValue, animate } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-  import { useMemo } from "react";
 import NightSkyDots from "../components/nightSkyComponent";
 import TextFromStars from "../components/textFromStars";
 
@@ -15,7 +14,6 @@ export default function Dashboard() {
   const STAR_BOX_SIZE = 100;
   const STAR_WIDTH = 76;
   const STAR_HEIGHT = 67;
-  const viewBox = "12 0 76 67";
 
   const starsControls = useAnimation();
   const maskSize = useMotionValue(0);
@@ -30,10 +28,12 @@ export default function Dashboard() {
   const [animationDone, setAnimationDone] = useState<boolean>(false);
   const [showNightSky, setShowNightSky] = useState<boolean>(false);
   const [starsOnString, setStarsOnString] = useState<boolean>(false);
+  const [stringHeights, setStringHeights] = useState<number[]>([]);
+  const starRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const starTopRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showText, setShowText] =useState<boolean>(false);
   const shineRef = useRef<HTMLAudioElement | null>(null);
   const finaleRef = useRef<HTMLAudioElement | null>(null);
-
 
   useEffect(() => {
     shineRef.current = new Audio("/sounds/shine.mp3");
@@ -52,44 +52,70 @@ export default function Dashboard() {
   const PULSE_COUNT = 4;
 
     const stars = [
-  { size: 40, className: "fixed lg:top-[90%] md:top-[80%] left-[52%] " },
-  { size: 50, className: "fixed lg:top-[90%] md:top-[80%] left-[50%]" },
-  { size: 42, className: "fixed lg:top-[90%] md:top-[80%] left-[48%]" },
-  { size: 12, className: "fixed lg:top-[90%] md:top-[80%] left-[50%]" },
-  { size: 14, className: "fixed lg:top-[90%] md:top-[80%] left-[53%]" },
-  { size: 58, className: "fixed lg:top-[86%] md:top-[76%] left-[50%]" },
-  { size: 60, className: "fixed lg:top-[86%] md:top-[76%] left-[52%]" },
-  { size: 15, className: "fixed lg:top-[91%] md:top-[81%] left-[54%]" },
-  { size: 34, className: "fixed lg:top-[91%] md:top-[81%] left-[49%]" },
-  { size: 34, className: "fixed lg:top-[89%] md:top-[79%] left-[50%]" },
-  { size: 34, className: "fixed lg:top-[89%] md:top-[79%] left-[52%]" },
-  { size: 55, className: "fixed lg:top-[86%] md:top-[79%] left-[48%]" },
+  { size: 40, className: "fixed md:top-[80%] lg:top-[90%] left-[52%]" },
+  { size: 50, className: "fixed md:top-[80%] lg:top-[90%] left-[50%]" },
+  { size: 42, className: "fixed md:top-[80%] lg:top-[90%] left-[48%]" },
+  { size: 12, className: "fixed md:top-[80%] lg:top-[90%] left-[50%]" },
+  { size: 14, className: "fixed md:top-[80%] lg:top-[90%] left-[53%]" },
+  { size: 58, className: "fixed md:top-[76%] lg:top-[86%] left-[50%]" },
+  { size: 60, className: "fixed md:top-[76%] lg:top-[86%] left-[52%]" },
+  { size: 15, className: "fixed md:top-[81%] lg:top-[91%] left-[54%]" },
+  { size: 34, className: "fixed md:top-[81%] lg:top-[91%] left-[49%]" },
+  { size: 34, className: "fixed md:top-[79%] lg:top-[89%] left-[50%]" },
+  { size: 34, className: "fixed md:top-[79%] lg:top-[89%] left-[52%]" },
+  { size: 55, className: "fixed md:top-[79%] lg:top-[86%] left-[48%]" },
 ];
 
-const rawStarTargets = [
-  { x: 450, y: -450 },
-  { x: -650, y: -180 },
-  { x: -300, y: -250 },
-  { x: -700, y: -600 },
-  { x: 550, y: -180 },
-  { x: -170, y: -50 },
-  { x: 200, y: -550 },
-  { x: -610, y: -480 },
-  { x: 220, y: -300 },
-  { x: -160, y: -260 },
-  { x: 500, y: -120 },
-  { x: -190, y: -470 },
-];
+  const [burstPositions, setBurstPositions] = useState<{ x: number; y: number }[]>(
+    stars.map(() => ({ x: 0, y: 0 }))
+  );
 
-const starBurstTargets = useMemo(() => {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
-  const scalex = isMobile ? 0.5 : 1;
-  const scaley = isMobile ? 0.4 : 1;
-  return rawStarTargets.map((target) => ({
-    x: target.x * scalex,
-    y: target.y * scaley,
-  }));
-}, []);
+
+  function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+      const check = () => setIsMobile(window.innerWidth < 1024);
+      check();
+      window.addEventListener("resize", check);
+      return () => window.removeEventListener("resize", check);
+    }, []);
+
+    return isMobile;
+  }
+
+  const isMobile = useIsMobile();
+
+  const starBurstTargets = isMobile
+    ? [
+        { x: 300, y: -220 },
+        { x: -220, y: -80 },
+        { x: -280, y: -200 },
+        { x: -160, y: -180 },
+        { x: 110, y: -210 },
+        { x: -90, y: -20 },
+        { x: 280, y: -100 },
+        { x: -320, y: -230 },
+        { x: 200, y: -10 },
+        { x: -80, y: -165 },
+        { x: 90, y: -60 },
+        { x: -335, y: -75 },
+      ]
+    : [
+        { x: 450, y: -450 },
+        { x: -650, y: -180 },
+        { x: -300, y: -250 },
+        { x: -700, y: -600 },
+        { x: 550, y: -180 },
+        { x: -170, y: -50 },
+        { x: 200, y: -550 },
+        { x: -610, y: -480 },
+        { x: 220, y: -300 },
+        { x: -160, y: -260 },
+        { x: 500, y: -120 },
+        { x: -190, y: -470 },
+      ];
+
 
   const starAnimations = useRef(stars.map(() => useAnimation())).current;
 
@@ -243,7 +269,9 @@ const starBurstTargets = useMemo(() => {
             opacity: 0,
             transition: { duration: 1.6, ease: "easeInOut" },
           }),
+          
         ]);
+        setBurstPositions(starBurstTargets);
         setStarsOnString(true);
         setShowText(true);
       };
@@ -251,9 +279,10 @@ const starBurstTargets = useMemo(() => {
     }
   }, [showAnimation]);
 
-const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
-  const w = size * (STAR_WIDTH / STAR_BOX_SIZE);
-  const h = size * (STAR_HEIGHT / STAR_BOX_SIZE);
+  const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
+    const w = size * (STAR_WIDTH / STAR_BOX_SIZE);
+    const h = size * (STAR_HEIGHT / STAR_BOX_SIZE);
+
 
   return (
     <div
@@ -275,6 +304,19 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
     </div>
   );
 };
+
+useEffect(() => {
+  if (!starsOnString) return;
+
+  const heights: number[] = [];
+  starTopRefs.current.forEach((ref, i) => {
+    if (ref) {
+      const rect = ref.getBoundingClientRect();
+      heights[i] = rect.top + window.scrollY;
+    }
+  });
+  setStringHeights(heights);
+}, [starsOnString]);
 
 
   const mask =
@@ -348,7 +390,7 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
         />
       </motion.div>
     )}
-    {animationDone && (
+    {hasInteracted && animationDone && (
       <motion.img
         src="/dragonbones/final.png"
         alt="Final"
@@ -361,6 +403,9 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
     {stars.map((star, i) => (
       <motion.div
         key={i}
+       ref={(el: HTMLDivElement | null) => {
+          starRefs.current[i] = el;
+        }}
         initial={{ opacity: 0 }}
         animate={{
           opacity: showStars ? 1 : 0
@@ -374,6 +419,7 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
         style={{ zIndex: 10, position: "fixed" }}
       >
         <motion.div animate={starsControls}>
+          
           <motion.div
             animate={starAnimations[i]}
             onPointerDown={starsOnString ? () => {
@@ -391,51 +437,54 @@ const StarSVG = ({ size = 32, style, ...props }: StarSVGProps) => {
             style={{
               transformOrigin: "50% 0%",
               cursor: starsOnString ? "pointer" : "default",
-              pointerEvents: starsOnString ? "auto" : "none"
+              pointerEvents: starsOnString ? "auto" : "none",
+               position: "relative", 
             }}
           >
-            <div className="scale-100 md:scale-[0.6] lg:scale-100">
-              <StarSVG size={star.size} />
+            <div
+                className="scale-100 md:scale-[0.6] lg:scale-100"
+                ref={(el) => { starTopRefs.current[i] = el; }}
+              >
+              <StarSVG  size={star.size} />
             </div>
           </motion.div>
         </motion.div>
       </motion.div>
     ))}
-      {starsOnString &&
+    {starsOnString &&
         stars.map((star, i) => {
-          function getPercent(css: string, type: "left" | "top") {
+          const height = stringHeights[i] ?? 0; // fallback if undefined
+
+          const getPercent = (css: string, type: "left" | "top") => {
             const match = css.match(new RegExp(`${type}-\\[(\\d+)%\\]`));
             return match ? Number(match[1]) : 50;
-          }
+          };
+
           const leftPercent = getPercent(star.className, "left");
-          const topPercent = getPercent(star.className, "top");
           const starWidthPx = star.size * (STAR_WIDTH / STAR_BOX_SIZE);
-          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${starWidthPx / 2}px)`;
-          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const y = starBurstTargets[i].y;
-          const scaledY = isMobile ? y * 0.4 : y;
-          const top = `calc(${topPercent}% + ${scaledY}px)`;
+
+          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${starWidthPx / 2}px - 0.5px)`;
 
           return (
             <div
               key={`string-${i}`}
               style={{
                 position: "fixed",
-                left,
                 top: 0,
+                left,
                 width: "1px",
-                height: `calc(${top})`,
+                height: `${height}px`,
                 background: "white",
                 opacity: 0.2,
                 zIndex: 9,
+                pointerEvents: "none",
               }}
             />
           );
-        })
-      }
-      {hasInteracted && showText && (
-        <TextFromStars/>
-      )}
-    </div>
-    )
-}
+        })}
+        {hasInteracted && showText && (
+          <TextFromStars/>
+        )}
+      </div>
+      )
+  }
