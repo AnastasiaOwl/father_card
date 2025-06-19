@@ -52,18 +52,18 @@ export default function Dashboard() {
   const PULSE_COUNT = 4;
 
     const stars = [
-  { size: 40, className: "fixed md:top-[80%] lg:top-[90%] left-[52%]" },
-  { size: 50, className: "fixed md:top-[80%] lg:top-[90%] left-[50%]" },
-  { size: 42, className: "fixed md:top-[80%] lg:top-[90%] left-[48%]" },
-  { size: 12, className: "fixed md:top-[80%] lg:top-[90%] left-[50%]" },
-  { size: 14, className: "fixed md:top-[80%] lg:top-[90%] left-[53%]" },
-  { size: 58, className: "fixed md:top-[76%] lg:top-[86%] left-[50%]" },
-  { size: 60, className: "fixed md:top-[76%] lg:top-[86%] left-[52%]" },
-  { size: 15, className: "fixed md:top-[81%] lg:top-[91%] left-[54%]" },
-  { size: 34, className: "fixed md:top-[81%] lg:top-[91%] left-[49%]" },
-  { size: 34, className: "fixed md:top-[79%] lg:top-[89%] left-[50%]" },
-  { size: 34, className: "fixed md:top-[79%] lg:top-[89%] left-[52%]" },
-  { size: 55, className: "fixed md:top-[79%] lg:top-[86%] left-[48%]" },
+  { size: 40, className: "fixed sm:top-[80%] md:top-[80%] lg:top-[90%] left-[52%]" },
+  { size: 50, className: "fixed sm:top-[80%] md:top-[80%] lg:top-[90%] left-[50%]" },
+  { size: 42, className: "fixed sm:top-[80%] md:top-[80%] lg:top-[90%] left-[48%]" },
+  { size: 12, className: "fixed sm:top-[80%] md:top-[80%] lg:top-[90%] left-[50%]" },
+  { size: 14, className: "fixed sm:top-[80%] md:top-[80%] lg:top-[90%] left-[53%]" },
+  { size: 58, className: "fixed sm:top-[76%] md:top-[76%] lg:top-[86%] left-[50%]" },
+  { size: 60, className: "fixed sm:top-[76%] md:top-[76%] lg:top-[86%] left-[52%]" },
+  { size: 15, className: "fixed sm:top-[81%] md:top-[81%] lg:top-[91%] left-[54%]" },
+  { size: 34, className: "fixed sm:top-[81%] md:top-[81%] lg:top-[91%] left-[49%]" },
+  { size: 34, className: "fixed sm:top-[79%] md:top-[79%] lg:top-[89%] left-[50%]" },
+  { size: 34, className: "fixed sm:top-[79%] md:top-[79%] lg:top-[89%] left-[52%]" },
+  { size: 55, className: "fixed sm:top-[79%] md:top-[79%] lg:top-[86%] left-[48%]" },
 ];
 
   const [burstPositions, setBurstPositions] = useState<{ x: number; y: number }[]>(
@@ -372,7 +372,7 @@ export default function Dashboard() {
           alt="girl"
           initial={{ opacity: 1 }}
           animate={{ opacity: girlVisible ? 1 : 0 }}
-          className="fixed lg:top-[65%] lg:left-[52%] md:top-[50%]  md:left-[53%] lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px] -translate-x-1/2 -translate-y-1/2"
+          className="fixed lg:top-[65%] lg:left-[52%] sm:top-[50%]  sm:left-[53%] md:top-[50%]  md:left-[53%] lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px] -translate-x-1/2 -translate-y-1/2"
           style={{
             zIndex: 5,
             WebkitMaskImage: mask,
@@ -384,7 +384,7 @@ export default function Dashboard() {
         />
         {showAnimation && !animationDone && (
         <motion.div 
-          className="fixed lg:top-[29%] left-[34%] md:top-[8%] pointer-events-none "
+          className="fixed lg:top-[29%] left-[34%] md:top-[8%] sm:top-[8%] pointer-events-none "
           initial={{ opacity: 1 }}
         >
           <iframe
@@ -403,7 +403,7 @@ export default function Dashboard() {
           alt="Final"
           animate={finalImgAnimation}
           initial={{ y: 0, opacity: 1 }}
-          className="fixed lg:top-[27%] lg:left-[34%] md:top-[8%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[290px] md:h-[290px]"
+          className="fixed sm:top-[8%] sm:left-[34%]  lg:top-[27%] lg:left-[34%] md:top-[8%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[290px] md:h-[290px]"
           style={{ zIndex: 1 }}
         />
       )}
