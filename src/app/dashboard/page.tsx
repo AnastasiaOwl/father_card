@@ -285,44 +285,49 @@ export default function Dashboard() {
 
 
   return (
-    <div
-      className="w-[32px] h-[28px] md:w-[24px] md:h-[21px] lg:w-[32px] lg:h-[28px]"
-      style={{ width: w, height: h }}
-    >
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="12 0 76 67"
-        {...props}
-        style={style}
+      <div
+        className="w-[32px] h-[28px] md:w-[24px] md:h-[21px] lg:w-[32px] lg:h-[28px]"
+        style={{ width: w, height: h }}
       >
-        <polygon
-          points="50,0 61,24 88,24 66,41 75,67 50,51 25,67 34,41 12,24 39,24"
-          fill="white"
-        />
-      </svg>
-    </div>
-  );
-};
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="12 0 76 67"
+          {...props}
+          style={style}
+        >
+          <polygon
+            points="50,0 61,24 88,24 66,41 75,67 50,51 25,67 34,41 12,24 39,24"
+            fill="white"
+          />
+        </svg>
+      </div>
+    );
+  };
 
-useEffect(() => {
-  if (!starsOnString) return;
+  useEffect(() => {
+    if (!starsOnString) return;
 
-  const heights: number[] = [];
-  starTopRefs.current.forEach((ref, i) => {
-    if (ref) {
-      const rect = ref.getBoundingClientRect();
-      heights[i] = rect.top + window.scrollY;
-    }
-  });
-  setStringHeights(heights);
-}, [starsOnString]);
+    const heights: number[] = [];
+    starTopRefs.current.forEach((ref, i) => {
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        heights[i] = rect.top + window.scrollY;
+      }
+    });
+    setStringHeights(heights);
+  }, [starsOnString]);
 
 
   const mask =
     maskActive && girlVisible
       ? `radial-gradient(circle at 50% 76%, white ${maskSizeState}%, transparent ${maskSizeState + 12}%)`
       : undefined;
+
+  const width = typeof window !== "undefined" ? window.innerWidth : 1024;
+  const isMd = width < 1024;
+  const transformOrigin = isMd ? "50% 20%" : "50% 0%";
+
 
     return(
     <div className="h-[100dvh]  bg-black relative overflow-hidden">
@@ -345,146 +350,149 @@ useEffect(() => {
             <p className="text-white text-2xl">тапни будь-де</p>
           </div>
     )}
-   {hasInteracted && showNightSky && (
-        <div
-          className="fixed inset-0 w-full h-full z-0 pointer-events-none"
+    {hasInteracted && (
+    <>
+    {showNightSky && (
+          <div
+            className="fixed inset-0 w-full h-full z-0 pointer-events-none"
+            style={{
+              WebkitMaskImage: mask,
+              maskImage: mask,
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
+              background: "black",
+            }}
+          >
+            <NightSkyDots />
+          </div>
+        )}
+        <motion.img
+          src="/images/girl.png"
+          alt="girl"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: girlVisible ? 1 : 0 }}
+          className="fixed lg:top-[65%] lg:left-[52%] md:top-[50%]  md:left-[53%] lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px] -translate-x-1/2 -translate-y-1/2"
           style={{
+            zIndex: 5,
             WebkitMaskImage: mask,
             maskImage: mask,
             WebkitMaskRepeat: "no-repeat",
             maskRepeat: "no-repeat",
             transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
-            background: "black",
-          }}
-        >
-          <NightSkyDots />
-        </div>
-      )}
-      <motion.img
-        src="/images/girl.png"
-        alt="girl"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: girlVisible ? 1 : 0 }}
-        className="fixed lg:top-[65%] lg:left-[52%] md:top-[50%]  md:left-[53%] lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px] -translate-x-1/2 -translate-y-1/2"
-        style={{
-          zIndex: 5,
-          WebkitMaskImage: mask,
-          maskImage: mask,
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          transition: "mask-image 0.5s, -webkit-mask-image 0.5s",
-        }}
-      />
-      {hasInteracted && showAnimation && !animationDone && (
-      <motion.div 
-        className="fixed lg:top-[29%] left-[34%] md:top-[10%] pointer-events-none "
-        initial={{ opacity: 1 }}
-      >
-        <iframe
-          src="/dragonbones/fathercard.html"
-          className="lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px]"
-          style={{
-            border: "none",
-            zIndex: 1,
           }}
         />
-      </motion.div>
-    )}
-    {hasInteracted && animationDone && (
-      <motion.img
-        src="/dragonbones/final.png"
-        alt="Final"
-        animate={finalImgAnimation}
-        initial={{ y: 0, opacity: 1 }}
-        className="fixed lg:top-[27%] lg:left-[34%] md:top-[8%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[290px] md:h-[290px]"
-        style={{ zIndex: 1 }}
-      />
-    )}
-    {stars.map((star, i) => (
-      <motion.div
-        key={i}
-       ref={(el: HTMLDivElement | null) => {
-          starRefs.current[i] = el;
-        }}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: showStars ? 1 : 0
-        }}
-        transition={{
-          delay: showStars ? 1.0 + i * 0.3 : 0,
-          duration: 0.8,
-          type: "tween"
-        }}
-        className={star.className}
-        style={{ zIndex: 10, position: "fixed" }}
-      >
-        <motion.div animate={starsControls}>
-          
-          <motion.div
-            animate={starAnimations[i]}
-            onPointerDown={starsOnString ? () => {
-            starAnimations[i].start({
-              rotate: [-22, 28, -14, 6, 0],
-              transition: { duration: 1.3, ease: "easeInOut" },
-            });
-            } : undefined}
-            onTouchStart={starsOnString ? () => {
-             starAnimations[i].start({
-              rotate: [-22, 28, -14, 6, 0],
-              transition: { duration: 1.3, ease: "easeInOut" },
-            });
-           } : undefined}
+        {showAnimation && !animationDone && (
+        <motion.div 
+          className="fixed lg:top-[29%] left-[34%] md:top-[10%] pointer-events-none "
+          initial={{ opacity: 1 }}
+        >
+          <iframe
+            src="/dragonbones/fathercard.html"
+            className="lg:w-[550px] lg:h-[550px] md:w-[300px] md:h-[300px]"
             style={{
-              transformOrigin: "50% 0%",
-              cursor: starsOnString ? "pointer" : "default",
-              pointerEvents: starsOnString ? "auto" : "none",
-               position: "relative", 
+              border: "none",
+              zIndex: 1,
             }}
-          >
-            <div
-                className="scale-100 md:scale-[0.6] lg:scale-100"
-                ref={(el) => { starTopRefs.current[i] = el; }}
-              >
-              <StarSVG  size={star.size} />
-            </div>
+          />
+        </motion.div>
+      )}
+      {animationDone && (
+        <motion.img
+          src="/dragonbones/final.png"
+          alt="Final"
+          animate={finalImgAnimation}
+          initial={{ y: 0, opacity: 1 }}
+          className="fixed lg:top-[27%] lg:left-[34%] md:top-[8%] md:left-[34%] lg:w-[550px] lg:h-[550px] md:w-[290px] md:h-[290px]"
+          style={{ zIndex: 1 }}
+        />
+      )}
+      {stars.map((star, i) => (
+        <motion.div
+          key={i}
+        ref={(el: HTMLDivElement | null) => {
+            starRefs.current[i] = el;
+          }}
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: showStars ? 1 : 0
+          }}
+          transition={{
+            delay: showStars ? 1.0 + i * 0.3 : 0,
+            duration: 0.8,
+            type: "tween"
+          }}
+          className={star.className}
+          style={{ zIndex: 10, position: "fixed" }}
+        >
+          <motion.div animate={starsControls}>
+            
+            <motion.div
+              animate={starAnimations[i]}
+              onPointerDown={starsOnString ? () => {
+              starAnimations[i].start({
+                rotate: [-22, 28, -14, 6, 0],
+                transition: { duration: 1.3, ease: "easeInOut" },
+              });
+              } : undefined}
+              onTouchStart={starsOnString ? () => {
+              starAnimations[i].start({
+                rotate: [-22, 28, -14, 6, 0],
+                transition: { duration: 1.3, ease: "easeInOut" },
+              });
+            } : undefined}
+              style={{
+                transformOrigin: transformOrigin,
+                cursor: starsOnString ? "pointer" : "default",
+                pointerEvents: starsOnString ? "auto" : "none",
+                position: "relative", 
+              }}
+            >
+              <div
+                  className="scale-100 md:scale-[0.6] lg:scale-100"
+                  ref={(el) => { starTopRefs.current[i] = el; }}
+                >
+                <StarSVG  size={star.size} />
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
-      </motion.div>
-    ))}
-    {starsOnString &&
-        stars.map((star, i) => {
-          const height = stringHeights[i] ?? 0; // fallback if undefined
+      ))}
+      {starsOnString &&
+          stars.map((star, i) => {
+            const height = stringHeights[i] ?? 0;
 
-          const getPercent = (css: string, type: "left" | "top") => {
-            const match = css.match(new RegExp(`${type}-\\[(\\d+)%\\]`));
-            return match ? Number(match[1]) : 50;
-          };
+            const getPercent = (css: string, type: "left" | "top") => {
+              const match = css.match(new RegExp(`${type}-\\[(\\d+)%\\]`));
+              return match ? Number(match[1]) : 50;
+            };
 
-          const leftPercent = getPercent(star.className, "left");
-          const starWidthPx = star.size * (STAR_WIDTH / STAR_BOX_SIZE);
+            const leftPercent = getPercent(star.className, "left");
+            const starWidthPx = star.size * (STAR_WIDTH / STAR_BOX_SIZE);
 
-          const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${starWidthPx / 2}px - 0.5px)`;
+            const left = `calc(${leftPercent}% + ${starBurstTargets[i].x}px + ${starWidthPx / 2}px - 0.5px)`;
 
-          return (
-            <div
-              key={`string-${i}`}
-              style={{
-                position: "fixed",
-                top: 0,
-                left,
-                width: "1px",
-                height: `${height}px`,
-                background: "white",
-                opacity: 0.2,
-                zIndex: 9,
-                pointerEvents: "none",
-              }}
-            />
-          );
-        })}
-        {hasInteracted && showText && (
-          <TextFromStars/>
-        )}
+            return (
+              <div
+                key={`string-${i}`}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left,
+                  width: "1px",
+                  height: `${height}px`,
+                  background: "white",
+                  opacity: 0.2,
+                  zIndex: 9,
+                  pointerEvents: "none",
+                }}
+              />
+            );
+          })}
+          {showText && (
+            <TextFromStars/>
+          )}
+        </>)}
       </div>
       )
   }
