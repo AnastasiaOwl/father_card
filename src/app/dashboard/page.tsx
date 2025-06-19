@@ -384,7 +384,7 @@ export default function Dashboard() {
         />
         {showAnimation && !animationDone && (
         <motion.div 
-          className="fixed lg:top-[29%] left-[34%] md:top-[10%] pointer-events-none "
+          className="fixed lg:top-[29%] left-[34%] md:top-[8%] pointer-events-none "
           initial={{ opacity: 1 }}
         >
           <iframe
